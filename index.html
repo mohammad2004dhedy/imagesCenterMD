@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Images Master</title>
+    <link rel="stylesheet" href="./css/Ai.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body>
+    <header>
+      <h1>Images Master</h1>
+      <div class="history-icon">
+        <i class="fa-solid fa-clock-rotate-left" id="historyBtn"></i>
+      </div>
+      <div class="history" id="history">
+        <h2>السجل</h2>
+        <div class="past-prompts"></div>
+        <button class="btn" id="clearHistory" class="disabled">
+          مسح السجل
+        </button>
+      </div>
+    </header>
+    <div class="container">
+      <div class="images" id="images">
+        <div class="image-box"></div>
+        <div class="image-box"></div>
+        <div class="image-box"></div>
+      </div>
+      <div class="prompt">
+        <div>
+          <input
+            id="input"
+            type="text"
+            required
+            placeholder="اكتب ما تريد البحث عنه"
+          />
+        </div>
+        <div class="selectLists">
+          <select name="numOFImages" class="selectListStyle" id="numOFImages">
+            <option value="" disabled selected>اختار عدد الصور</option>
+            <option value="1">1</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="7">7</option>
+          </select>
+          <select name="typeOfImages" class="selectListStyle" id="imagesType">
+            <option value="" selected disabled>اختار نوع الصور</option>
+            <option value="Ai" title="this option is not available yet :(">
+              ذكاء اصطناعي
+            </option>
+            <option value="pexels">صور بكسلز</option>
+            <option value="unsplash">صور انسبلاش</option>
+            <option value="pixapay">صور بيكساباي</option>
+            <option value="illustration">illustration</option>
+            <option value="vector">جرافيك</option>
+            <option value="dark">صور داكنة</option>
+          </select>
+        </div>
+
+        <button onclick="getImages()" id="btn" class="btn">انئر يغالي</button>
+      </div>
+    </div>
+    <script src="./js/app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv4.min.js"></script>
+  </body>
+</html>
