@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url= env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+model User {
+  id             String          @id @default(cuid())
+  name           String?
+  email          String          @unique
+  passwordHash   String
+  role           Role            @default(user)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  lastActiveAt   DateTime?
+  searchHistory  SearchHistory[]
+  favoriteImages FavoriteImage[]
+  reports        Report[]
+  analytics      Analytics[]
+
+  @@map("users")
+}
+
+model SearchHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  keyword   String
+  provider  String?
+  category  String?
+  resultCount Int   @default(0)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([keyword])
+  @@map("search_history")
+}
+
+model FavoriteImage {
+  id          String   @id @default(cuid())
+  userId      String
+  provider    String
+  externalId  String
+  title       String?
+  imageUrl    String
+  thumbUrl    String?
+  pageUrl     String?
+  author      String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, externalId])
+  @@index([userId, createdAt])
+  @@map("favorite_images")
+}
+
+model CachedSearch {
+  id         String   @id @default(cuid())
+  cacheKey   String   @unique
+  keyword    String
+  provider   String?
+  category   String?
+  payload    Json
+  hitCount   Int      @default(0)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([cacheKey])
+  @@index([expiresAt])
+  @@map("cached_searches")
+}
+
+model Analytics {
+  id        String   @id @default(cuid())
+  userId    String?
+  event     String
+  provider  String?
+  keyword   String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([event, createdAt])
+  @@index([keyword])
+  @@map("analytics")
+}
+
+model Report {
+  id        String   @id @default(cuid())
+  userId    String?
+  type      String
+  status    String   @default("open")
+  payload   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("reports")
+}
