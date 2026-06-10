@@ -62,7 +62,7 @@ async function recordSearch({ userId, query, category, resultCount, cached }) {
   if (userId) {
     await addSearchHistory({
       userId,
-      keyword: query,
+      keyword: query, 
       provider: category === "all" ? "brokered" : category,
       category,
       resultCount

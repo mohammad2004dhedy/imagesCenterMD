@@ -27,6 +27,7 @@ export const authApi = {
   me: () => request("/api/auth/me"),
   login: (payload) => request("/api/auth/login", { method: "POST", body: payload }),
   signup: (payload) => request("/api/auth/signup", { method: "POST", body: payload }),
+  oauth: (payload) => request("/api/auth/oauth", { method: "POST", body: payload }),
   logout: () => request("/api/auth/logout", { method: "POST" })
 };
 

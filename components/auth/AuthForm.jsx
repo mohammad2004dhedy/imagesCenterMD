@@ -8,6 +8,7 @@ import { ArrowRight, ImagePlus, Lock, Mail, User } from "lucide-react";
 import Swal from "sweetalert2";
 import { authApi } from "@/services/apiClient";
 import { useAuth } from "@/hooks/useAuth";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
 
 export default function AuthForm({ mode }) {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function AuthForm({ mode }) {
   const { user, loading: authLoading, setUser } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const isSignup = mode === "signup";
   const nextPath = params.get("next");
   const switchHref = `${isSignup ? "/login" : "/signup"}${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`;
@@ -90,6 +92,30 @@ export default function AuthForm({ mode }) {
     toast?.push(isSignup ? "Account created." : "Welcome back.", "success");
     router.push(params.get("next") || "/dashboard");
     router.refresh();
+  }
+
+  async function continueWithGoogle() {
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) {
+      toast?.push("Supabase Auth is not configured.", "error");
+      return;
+    }
+
+    setGoogleLoading(true);
+    const callback = new URL("/auth/callback", window.location.origin);
+    if (nextPath) callback.searchParams.set("next", nextPath);
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callback.toString()
+      }
+    });
+
+    if (error) {
+      setGoogleLoading(false);
+      toast?.push(error.message || "Unable to start Google sign in.", "error");
+    }
   }
 
   return (
@@ -168,6 +194,22 @@ export default function AuthForm({ mode }) {
           <button className="saas-button mt-6 max-w-md disabled:cursor-not-allowed disabled:opacity-60" disabled={loading}>
             {loading ? "Please wait..." : isSignup ? "Create account" : "Login"}
             {!loading && <ArrowRight size={18} />}
+          </button>
+
+          <div className="my-6 flex max-w-md items-center gap-3 text-xs font-black uppercase tracking-[0.16em] text-slate-400">
+            <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+            <span>or</span>
+            <span className="h-px flex-1 bg-slate-200 dark:bg-white/10" />
+          </div>
+
+          <button
+            className="flex h-14 max-w-md items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 font-black text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
+            disabled={loading || googleLoading}
+            type="button"
+            onClick={continueWithGoogle}
+          >
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-white text-sm font-black text-blue-600">G</span>
+            {googleLoading ? "Redirecting..." : isSignup ? "Create account with Google" : "Sign in with Google"}
           </button>
 
           <p className="mt-6 max-w-md text-center text-sm text-slate-500 dark:text-slate-300">

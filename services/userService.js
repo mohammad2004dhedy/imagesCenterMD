@@ -36,6 +36,35 @@ export async function authenticateUser(email, password) {
   return publicUser(user);
 }
 
+export async function upsertOAuthUser({ id, email, name }) {
+  const db = requirePrisma();
+  const normalizedEmail = email.toLowerCase().trim();
+  const existing = await db.user.findUnique({ where: { email: normalizedEmail } });
+
+  if (existing) {
+    const user = await db.user.update({
+      where: { id: existing.id },
+      data: {
+        name: existing.name || name || null,
+        lastActiveAt: new Date()
+      }
+    });
+    return publicUser(user);
+  }
+
+  const user = await db.user.create({
+    data: {
+      id,
+      name: name || null,
+      email: normalizedEmail,
+      passwordHash: `oauth:${id}`,
+      role: "user",
+      lastActiveAt: new Date()
+    }
+  });
+  return publicUser(user);
+}
+
 export async function getUserById(id) {
   const db = requirePrisma();
   const user = await db.user.findUnique({ where: { id } });
